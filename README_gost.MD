@@ -1,0 +1,151 @@
+# Gost Tutorial
+
+- Gost supports both SOCKS4, SOCKS5 and HTTP proxy connections
+
+## Chaining Proxies
+
+```bash
+# Chaining http proxy -> upstream socks5
+./gost -L http://:8888 -F socks5://127.0.0.1:8890
+
+curl --proxy 'http://localhost:8888' http://myip.wtf/json
+
+# Chaining socks5 proxy -> upstream socks5
+./gost -L socks5://:8888 -F socks5://localhost:8890
+
+# Can even chain multiple upstream proxies
+# ./gost -L socks5://:8888 \
+#   -F socks5://localhost:8890 -F socks5://localhost:9999
+
+curl --proxy 'socks5://localhost:8888' http://myip.wtf/json
+```
+
+## TLS Offloading #1 (HTTPS -> HTTP)
+```bash
+# A webserver listening localhost:8080
+python3 -m http.server --bind 127.0.0.1 8080
+
+# Listening on 8443 and forwarding to localhost:8080
+# Self-signed cert is auto-generated
+./gost -L tls://:8443/127.0.0.1:8080
+
+####################
+
+# Access the HTTPS endpoint
+curl -k https://192.168.2.60:8443
+```
+
+## TLS Offloading #2 (HTTP -> HTTPS -> HTTPS -> HTTP)
+```bash
+# A webserver listening localhost:8080
+python3 -m http.server --bind 127.0.0.1 8080
+
+# Listening on 8443 and forwarding to localhost:8080
+# Self-signed cert is auto-generated
+./gost -L tls://:8443/127.0.0.1:8080
+
+####################
+# listen on 0.0.0.0:8080, connect to server:8443
+./gost -L tcp://:8080 -F forward+tls://192.168.2.60:8443
+
+# Access the server
+curl -k http://localhost:8080
+```
+
+
+## Simple Local Port Forward
+```bash
+# tcp-listen 1234 -> localhost:22
+./gost -L tcp://:1234/localhost:22
+```
+
+## Local Port Forward through an SOCKS5 Proxy
+#### Useful on Android:
+1. Chrome on Android does NOT support proxy settings. 
+2. Shadowsocks on Android does NOT support local-tunnel.
+```bash
+# HTTP Server listening on localhost only, port 8888
+python3 -m http.server --bind 127.0.0.1 8888
+
+# Server is protected by a Shadowsock Server
+./ssserver -c server_config.json
+>>> INFO shadowsocks tcp server listening on 0.0.0.0:8388, inbound address 0.0.0.0:8388
+
+####################
+
+# Client creates a SOCKS5 Proxy
+./sslocal -c client1.json
+>>> INFO shadowsocks socks TCP listening on 127.0.0.1:8890
+
+# gost creates a connection which uses the HTTP Proxy
+# local listen on 1234 -> proxy -> server:8888
+./gost -L tcp://:1234/localhost:8888  -F socks5://127.0.0.1:8890
+
+# Access the protected web server
+curl http://localhost:1234
+
+# Equivalent to using SOCKS5 with curl
+# curl --proxy socks5://127.0.0.1:8890 http://127.0.0.1:8888
+```
+
+
+## Local Port Forward, SSH through an HTTP Proxy
+#### Useful on Android:
+1. Shadowsocks on Android does NOT support local-tunnel.
+```bash
+# Server is protected by a Shadowsock Server
+./ssserver -c server_config.json
+>>> INFO shadowsocks tcp server listening on 0.0.0.0:8388, inbound address 0.0.0.0:8388
+
+####################
+
+# Client creates a SOCKS5 Proxy
+./sslocal -c client1.json
+>>> INFO  shadowsocks socks TCP listening on 127.0.0.1:8890
+
+# gost creates a connection to server's SSH port
+# local listen on 1234 -> proxy -> server:22
+./gost -L tcp://:1234/localhost:22 -F socks5://127.0.0.1:8890
+
+# Make SSH connection
+ssh 127.0.0.1 -p 1234
+
+# Equivalent to 
+# ssh 127.0.0.1 -o "ProxyCommand=nc -X connect -x 127.0.0.1:8890 %h %p"
+```
+
+## Relay (proprietary protocol) + TLS
+```bash
+# Server listening on port 12345
+./gost -L relay+tls://username:password@:12345
+
+####################
+
+# Client running SOCKS5 at 8888, connect to server with TLS
+./gost -L socks://:8888 -F relay+tls://username:password@server_ip:12345?nodelay=false
+
+# Using the proxy
+curl --proxy 'socks5://127.0.0.1:8888' http://myip.wtf/json
+```
+
+
+## Relay (proprietary protocol) + UDP + TCP Port Forward
+#### Useful:
+1. Running wireguard over Gost Relay.
+
+```bash
+# Server listening on port 12345
+./gost -L relay://:12345
+
+####################
+
+# Connect to server via Relay
+# Make sure for UDP, use keepAlive and ttl
+/gost \
+  -L 'udp://:1234/wireguard:51820?keepAlive=true&ttl=5s' \
+  -L tcp://:4321/ssh-server:22
+  -F relay://server_ip:12345?nodelay=false
+
+# Wireguard (connect to 127.0.0.1:1234)
+./wireproxy -c wg0.conf
+```
