@@ -44,23 +44,20 @@ socat -d -d TCP-LISTEN:1234 OPEN:savedFile.txt,create
 ####################
 
 # Tx side
-socat -d -d -u OPEN:/etc/passwd TCP-CONNECT:127.0.0.1:1234
+socat -d -d -u OPEN:/etc/passwd TCP-CONNECT:192.168.2.60:1234
 ```
 
 ## Create a SSL Shell (Remote shell)
+#### Refer to [Generate SSL Certs Guide](./README_generate_ssl_certs.MD) on creating a CA signed cert
+
 ```bash
-# Generate a self-signed cert
-openssl req -newkey rsa:2048 -nodes -keyout cert.key -x509 -days 1000 -out cert.crt
-
-cat cert.key cert.crt > sslcert.pem
-
 # Remote side
-socat -d -d OPENSSL-LISTEN:1234,cert=sslcert.pem,verify=0 -
+socat -d -d OPENSSL-LISTEN:1234,fork,reuseaddr,cert=server.pem,cafile=rootCA.crt -
 
 ####################
 
 # Local side, giving the remote side a bash shell
-socat -d -d OPENSSL-CONNECT:127.0.0.1:1234,cert=sslcert.pem,verify=0 EXEC:/bin/bash
+socat -d -d OPENSSL-CONNECT:192.168.2.60:1234,cert=client.pem,cafile=rootCA.crt EXEC:/bin/bash
 ```
 
 ## TLS Offloading (HTTPS -> HTTP)
@@ -69,12 +66,12 @@ socat -d -d OPENSSL-CONNECT:127.0.0.1:1234,cert=sslcert.pem,verify=0 EXEC:/bin/b
 python3 -m http.server --bind 127.0.0.1 8080
 
 # Listening on 1234 and forwarding to localhost:8080
-socat -dd OPENSSL-LISTEN:1234,fork,reuseaddr,cert=sslcert.pem,verify=0 tcp:localhost:8080
+socat -dd OPENSSL-LISTEN:1234,fork,reuseaddr,cert=server.pem,cafile=rootCA.crt tcp:localhost:8080
 
 ####################
 
 # Access the HTTPS endpoint
-curl -k https://192.168.2.60:1234
+curl https://192.168.2.60:1234 --cacert rootCA.crt --cert client.pem
 ```
 
 ## Local Port Forward through an HTTP Proxy
