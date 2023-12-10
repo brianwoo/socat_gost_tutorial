@@ -128,3 +128,19 @@ ssh 127.0.0.1 -p 1234
 # Using the proxy
 curl --proxy 'socks5://127.0.0.1:8888' http://myip.wtf/json
 ```
+
+
+## Relay (proprietary protocol) + WSS
+#### Websocket Secure (wss) Tunnel with SOCKS5 proxy
+```bash
+# Server listening on port 12345
+./gost -L 'relay+wss://username:password@:12345?caFile=rootCA.crt&certFile=server.crt&keyFile=server.key'
+
+####################
+
+# Client running SOCKS5 at 8888, connect to server with WSS
+./gost -L socks5://:8888 -F 'relay+wss://username:password@192.168.2.60:12345?caFile=rootCA.crt&certFile=client.crt&keyFile=client.key&nodelay=false'
+
+# Using the proxy
+curl --proxy 'socks5://127.0.0.1:8888' http://myip.wtf/json
+```
