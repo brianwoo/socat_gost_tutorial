@@ -60,11 +60,6 @@ curl http://localhost:8080
 ```
 
 ## Local Port Forward through an SOCKS5 Proxy
-#### Useful on Android:
-
-1. Chrome on Android does NOT support proxy settings. 
-2. Shadowsocks on Android does NOT support local-tunnel.
-
 
 ```bash
 # HTTP Server listening on localhost only, port 8888
@@ -93,10 +88,6 @@ curl http://localhost:1234
 
 
 ## Local Port Forward, SSH through an HTTP Proxy
-
-#### Useful on Android:
-
-1. Shadowsocks on Android does NOT support local-tunnel.
 
 ```bash
 # Server is protected by a Shadowsock Server
