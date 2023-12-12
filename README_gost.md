@@ -65,6 +65,7 @@ curl http://localhost:8080
 1. Chrome on Android does NOT support proxy settings. 
 2. Shadowsocks on Android does NOT support local-tunnel.
 
+
 ```bash
 # HTTP Server listening on localhost only, port 8888
 python3 -m http.server --bind 127.0.0.1 8888
