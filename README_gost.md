@@ -93,6 +93,9 @@ curl http://localhost:1234
 
 ## Local Port Forward, SSH through an HTTP Proxy
 
+Why is this useful on Android?
+- Shadowsocks on Android does NOT support local-tunnel.
+
 ```bash
 # Server is protected by a Shadowsock Server
 ./ssserver -c server_config.json

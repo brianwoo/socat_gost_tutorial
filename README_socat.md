@@ -75,9 +75,11 @@ curl https://192.168.2.60:1234 --cacert rootCA.crt --cert client.pem
 ```
 
 ## Local Port Forward through an HTTP Proxy
-#### Useful on Android:
-1. Chrome on Android does NOT support proxy settings. 
-2. Shadowsocks on Android does NOT support local-tunnel.
+
+Why is this useful on Android?
+- Chrome on Android does NOT support proxy settings. 
+- Shadowsocks on Android does NOT support local-tunnel.
+
 ```bash
 # HTTP Server listening on localhost only, port 8888
 python3 -m http.server --bind 127.0.0.1 8888
@@ -103,8 +105,10 @@ curl http://localhost:1234
 ```
 
 ## Local Port Forward, SSH through an HTTP Proxy
-#### Useful on Android:
-1. Shadowsocks on Android does NOT support local-tunnel.
+
+Why is this useful on Android?
+- Shadowsocks on Android does NOT support local-tunnel.
+
 ```bash
 # Server is protected by a Shadowsock Server
 ./ssserver -c server_config.json
