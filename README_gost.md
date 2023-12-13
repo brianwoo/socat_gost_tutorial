@@ -148,3 +148,20 @@ curl --proxy 'socks5://127.0.0.1:8888' http://myip.wtf/json
 # Using the proxy
 curl --proxy 'socks5://127.0.0.1:8888' http://myip.wtf/json
 ```
+
+## Relay (proprietary protocol) + UDP over TLS Tunnel
+#### UDP (e.g. Wireguard) over TLS Tunnel
+#### Note: UDP requires the keepalive and ttl parameters
+#### Note: Wireguard requires MTU set to lower (MTU = 960 tested OK)
+```bash
+# Server listening on port 12345
+./gost -L 'relay+tls://username:password@:12345?caFile=rootCA.crt&certFile=server.crt&keyFile=server.key'
+
+####################
+
+# Client connect to server with TLS, forward UDP to wireguard:51820
+./gost -L "udp://:1234/wireguard:51820?keepalive=true&ttl=5s" -F 'relay+tls://username:password@192.168.2.60:12345?caFile=rootCA.crt&certFile=client.crt&keyFile=client.key&nodelay=false'
+
+# Wireguard to localhost:1234
+./wireproxy -c wg0.conf
+```
