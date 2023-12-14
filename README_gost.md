@@ -149,6 +149,22 @@ curl --proxy 'socks5://127.0.0.1:8888' http://myip.wtf/json
 curl --proxy 'socks5://127.0.0.1:8888' http://myip.wtf/json
 ```
 
+## Relay (proprietary protocol) + QUIC (UDP)
+#### QUIC Tunnel with SOCKS5 proxy
+```bash
+# Server listening on port 12345
+./gost -L 'relay+quic://username:password@:12345?caFile=rootCA.crt&certFile=server.crt&keyFile=server.key'
+
+####################
+
+# Client running SOCKS5 at 8888, connect to server with QUIC
+./gost -L socks5://:8888 -F 'relay+quic://username:password@192.168.2.60:12345?caFile=rootCA.crt&certFile=client.crt&keyFile=client.key&nodelay=false'
+
+# Using the proxy
+curl --proxy 'socks5://127.0.0.1:8888' http://myip.wtf/json
+```
+
+
 ## Relay (proprietary protocol) + UDP over TLS Tunnel
 #### UDP (e.g. Wireguard) over TLS Tunnel
 #### Note: UDP requires the keepalive and ttl parameters
