@@ -1,5 +1,5 @@
 # Generate Private RootCA, Server & Client SSL Certs
-- NOTE: ed25519 will not work with browser TLS handshake. This is for a machine-to-machine communication.
+- NOTE: ed25519 will not work with browser TLS handshake. This guide is for a machine-to-machine communication.
 - NOTE: for browser TLS handshake, use rsa:2048 or rsa:4096
 
 ## Generate a Root CA
