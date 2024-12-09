@@ -1,6 +1,6 @@
 # Generate Self Signed SSL Certs
-- NOTE: ed25519 will not work with browser TLS handshake. This is for a machine-to-machine communication.
 - NOTE: for browser TLS handshake, use rsa:2048 or rsa:4096
+- Self Signed Certs is good for quick testing purposes
 
 ```bash
 openssl req -newkey rsa:4096 -nodes \
